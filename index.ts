@@ -33,6 +33,16 @@ const url = new RegExp(
   "i",
 );
 
+function make_id(length: number) {
+  let result = "";
+  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  let charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
 app
   .get("/", (c) => {
     return c.file("index.html");
@@ -51,10 +61,10 @@ app
   })
   .post("/api/create", async (c) => {
     let { link, short } = await c.body();
-    if (link === undefined) {
+    if (link === undefined || link === "") {
       throw new HttpException("No link provided", 400);
-    } else if (short === undefined) {
-      throw new HttpException("No short provided", 400);
+    } else if (short === undefined || short === "") {
+      short = make_id(7);
     } else if (short.length < 2) {
       throw new HttpException("Short too short (min 2)", 400);
     } else if (short.length > 56) {
