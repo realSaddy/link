@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Link Shortener</title>
+</head>
+<body>
+<style>
+    body {
+        font-family: "Roboto Light", "Noto Sans Hebrew Light", sans-serif;
+        background: #262323;
+        color: white;
+        text-align: center;
+        margin: 10%;
+    }
+
+    h1 {
+        font-size: 4rem;
+    }
+
+    label {
+        padding-top: 3%;
+        font-size: 2rem;
+    }
+
+    br {
+        margin: 1%;
+    }
+
+    input {
+        font-size: 2rem;
+    }
+
+    input[type=submit] {
+        color: white;
+        margin-top: 2%;
+        border: none;
+        background-color: #4CAF50;
+        text-decoration: none;
+        padding: 15px 32px;
+        display: inline-block;
+        font-size: 2rem;
+    }
+
+    input[type=submit]:hover {
+        cursor: pointer;
+    }
+
+    input[type=submit]:active {
+
+        box-shadow: 0 5px #666;
+        transform: translateY(4px);
+    }
+
+    #returned {
+        color: white;
+    }
+
+</style>
+<h1>Link Shortener</h1>
+<a href="" id="returned"></a>
+<br/>
+<form>
+    <label>
+        Link
+        <br/>
+        <input id="link" name="link" placeholder="https://duckduckgo.com/" required type="text"/>
+    </label>
+    <br/>
+    <label>
+        (Optional) Short
+        <br/>
+        <input id="short" name="short" placeholder="abcdef (2-56 characters)" type="text"/>
+    </label>
+    <br/>
+    <input value="Submit" type="submit"/>
+</form>
+<script>
+    let returned = document.getElementById("returned");
+    let link = document.getElementById("link")
+    document.querySelector('form').addEventListener('submit', async e => {
+        e.preventDefault()
+        try {
+            let r = await fetch("/api/create", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'link': link.value,
+                    'short': document.getElementById("short").value
+                })
+            })
+            let j = await r.json();
+            if (r.status > 299) {
+                returned.href = '';
+                returned.style.color = 'red';
+                returned.textContent = j.message;
+            } else {
+                returned.style.color = 'white';
+                returned.href = "https://l.saddy.dev/"+j.short
+                returned.textContent = "https://l.saddy.dev/"+j.short
+            }
+        } catch (e) {
+            throw new Error(e.message);
+        }
+        return false
+    })
+</script>
+</body>
+</html>
