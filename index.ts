@@ -10,7 +10,7 @@ const client = new MongoClient();
 const app = new Application();
 
 await client.connectWithUri(
-  `mongodb://${env.DB_USER}:${env.DB_PASS}@${env.DB_HOST}:27017/${env.DB_DB}`,
+  `mongodb://${env.DB_USER}:${env.DB_PASS}@${env.DB_HOST}:27017/${env.DB_DB}`
 );
 
 interface LinkSchema {
@@ -30,7 +30,7 @@ const url = new RegExp(
     "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
     "(\\?[;&a-z\\d%_.~+=-]*)?" +
     "(\\#[-a-z\\d_]*)?$",
-  "i",
+  "i"
 );
 
 function make_id(length: number) {
@@ -52,7 +52,7 @@ app
   })
   .get("*", async (c) => {
     let find = await links.findOne({
-      "short": c.path.substr(1),
+      short: c.path.substr(1),
     });
     if (find === null) {
       throw new HttpException("Short not found", 400);
@@ -60,8 +60,10 @@ app
     return c.redirect(find.link);
   })
   .post("/api/create", async (c) => {
-    let { link, short } = await c.body();
-    if (link === undefined || link === "") {
+    let { link, short, password } = await c.body();
+    if (password === undefined || password != env.PASSWORD) {
+      throw new HttpException("Invalid password!", 401);
+    } else if (link === undefined || link === "") {
       throw new HttpException("No link provided", 400);
     } else if (short === undefined || short === "") {
       short = make_id(7);
@@ -73,13 +75,13 @@ app
       throw new HttpException("You may only use letters", 400);
     } else if (!link.match(url)) {
       throw new HttpException("Invalid URL", 400);
-    } else if (await links.findOne({ short: short }) !== null) {
+    } else if ((await links.findOne({ short: short })) !== null) {
       throw new HttpException("Short already taken", 400);
     }
     await links.insertOne({
-      "link": link,
-      "short": short,
+      link: link,
+      short: short,
     });
-    return { "success": true, "short": short };
+    return { success: true, short: short };
   })
   .start({ port: 8662 });

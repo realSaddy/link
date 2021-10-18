@@ -72,6 +72,12 @@
         <input id="short" name="short" placeholder="abcdef (2-56 characters)" type="text"/>
     </label>
     <br/>
+    <label>
+        Password
+        <br/>
+        <input id="password" name="password" placeholder="***" type="text"/>
+    </label>
+    <br/>
     <input value="Submit" type="submit"/>
 </form>
 <script>
@@ -88,7 +94,8 @@
                 },
                 body: JSON.stringify({
                     'link': link.value,
-                    'short': document.getElementById("short").value
+                    'short': document.getElementById("short").value,
+                    'password': document.getElementById("password").value
                 })
             })
             let j = await r.json();
